@@ -1,0 +1,41 @@
+* install tftpd-hpa
+* setup /etc/default/tftpd-hpa:
+TFTP_USERNAME="tftp"
+TFTP_DIRECTORY="/srv/tftpdboot"
+TFTP_ADDRESS="0.0.0.0:69"
+TFTP_OPTIONS="--secure -vv"
+
+* install nfs-kernel-server
+* setup all nfs drives in /etc/exports like:
+/clientBoot1 192.168.1.0/255.255.255.0(rw,sync,no_root_squash,no_subtree_check)
+/clientBoot2 192.168.1.0/255.255.255.0(rw,sync,no_root_squash,no_subtree_check)
+
+* install dhcpd
+* setup /etc/dhcpd.conf
+* define hosts as:
+host myPC {
+  hardware ethernet aa:aa:aa:aa:aa:aa;
+  fixed-address 192.168.1.1
+}
+
+* install syslinux (ldlinux.c32)
+* copy over ldlinux.c32 to tftpd server
+cp usr/lib/syslinux/modules/bios/ldlinux.c32 /srv/tftpdboot/
+cp /etc/resolv.conf ...
+
+List of packages:
+* install openmpi
+* install emacs
+* install python
+
+* copy users to clients
+
+Following files/dirs are required for traditional Linux user management:
+* /etc/passwd – contains various pieces of information for each user account
+* /etc/shadow – contains the encrypted password information for user’s accounts and optional the password aging information.
+* /etc/group – defines the groups to which users belong
+* /etc/gshadow – group shadow file (contains the encrypted password for group)
+* /var/spool/mail – Generally user emails are stored here
+
+* Setup /srv/tfpdboot/pxelinux.cfg/default
+* You can also set a different file for each IP in that file so they load the correct nfs
