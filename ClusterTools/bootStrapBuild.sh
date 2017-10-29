@@ -63,6 +63,10 @@ none                    /var/log   tmpfs    defaults     0  0
 192.168.1.51:/scratch2  /scratch2  nfs      tcp,nolocak  1  2
 EOF
 
+    # create scratch drives for HPC work
+    mkdir "${WORK_DIR}/scratch1"
+    mkdir "${WORK_DIR}/scratch2"
+    
     # Set up initramfs for booting with squashfs+aufs
     cat >> "${WORK_DIR}/etc/initramfs-tools/modules" << EOF
 squashfs
@@ -84,7 +88,7 @@ EOF
 #cp -rfa /ramboottmp/* ${rootmnt}
 #umount /ramboottmp
 # This does the above--- only with sed, which is... complex
-    sed -i 's/mount ${roflag} ${ROOTFLAGS} ${ROOT} ${rootmnt}/mkdir \/ramboottmp'\\n'echo "Unwrapping squashed FS"'\\n'echo "PWD"'\\n'pwd'\\n'echo "List of local directory"'\\n'ls'\\n'mount -t squashfs br.squashfs \/ramboottmp'\\n'mount -t tmpfs -o size=100% none ${rootmnt}'\\n'echo "Copying squashfs to tmpfs"'\\n'cp -rfa \/ramboottmp\/* ${rootmnt}'\\n'echo "Unmounting squashfs"'\\n'umount \/ramboottmp/g' '/usr/share/initramfs-tools/scripts/local'
+#    sed -i 's/mount ${roflag} ${ROOTFLAGS} ${ROOT} ${rootmnt}/mkdir \/ramboottmp'\\n'echo "Unwrapping squashed FS"'\\n'echo "PWD"'\\n'pwd'\\n'echo "List of local directory"'\\n'ls'\\n'mount -t squashfs br.squashfs \/ramboottmp'\\n'mount -t tmpfs -o size=100% none ${rootmnt}'\\n'echo "Copying squashfs to tmpfs"'\\n'cp -rfa \/ramboottmp\/* ${rootmnt}'\\n'echo "Unmounting squashfs"'\\n'umount \/ramboottmp/g' '/usr/share/initramfs-tools/scripts/local'
 
 # This uses aufs to glue together two filesystems, we don't need that here
 #cat >"${WORK_DIR}/etc/initramfs-tools/scripts/init-bottom/aufs" << EOF
