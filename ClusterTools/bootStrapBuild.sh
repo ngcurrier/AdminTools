@@ -13,7 +13,7 @@ if [ -f rootcache.tar.gz ]; then
     tar --extract --numeric-owner --gzip --file rootcache.tar.gz --directory "${WORK_DIR}" 
     echo "NOT extracting new debootstrap from network, compiling rootcache.tar.gz to squashfs and deploying"
 else
-    debootstrap --variant=minbase --components=main,non-free --include=linux-image-amd64,net-tools,ifupdown,isc-dhcp-client,openssh-server,less,nano,python,emacs,lvm2,debootstrap,initramfs-tools,libopenmpi-dev,syslinux-common,firmware-bnx2 stretch  "${WORK_DIR}" http://httpredir.debian.org/debian
+    debootstrap --variant=minbase --components=main,non-free --include=linux-image-amd64,net-tools,ifupdown,isc-dhcp-client,openssh-server,less,nano,python,emacs,lvm2,debootstrap,initramfs-tools,libopenmpi-dev,syslinux-common,firmware-bnx2,nfs-common stretch  "${WORK_DIR}" http://httpredir.debian.org/debian
 
     # Clean up file with misleading information from host
     rm "${WORK_DIR}/etc/hostname"
@@ -52,15 +52,15 @@ EOF
     # Setup /etc/fstab for booting to ramdisk root and NFS
     cat > "${WORK_DIR}/etc/fstab" << EOF
 #This FSTAB is designed for use on the smaug cluster
-proc                    /proc      proc     defaults     0  0
-/dev/nfs                /          nfs      tcp,nolock   0  0
-none                    /tmp       tmpfs    defaults     0  0
-none                    /var/tmp   tmpfs    defaults     0  0
-none                    /media     tmpfs    defaults     0  0
-none                    /var/log   tmpfs    defaults     0  0
-192.168.1.51:/home      /home      nfs      tcp,nolock   1  2
-192.168.1.51:/scratch1  /scratch1  nfs      tcp,nolocak  1  2
-192.168.1.51:/scratch2  /scratch2  nfs      tcp,nolocak  1  2
+proc                    /proc      proc     defaults            0  0
+/dev/nfs                /          nfs      tcp,nolock          0  0
+none                    /tmp       tmpfs    defaults            0  0
+none                    /var/tmp   tmpfs    defaults            0  0
+none                    /media     tmpfs    defaults            0  0
+none                    /var/log   tmpfs    defaults            0  0
+192.168.1.51:/home      /home      nfs      rw,sync,hard,intr   1  2
+192.168.1.51:/scratch1  /scratch1  nfs      rw,sync,hard,intr   0  0
+192.168.1.51:/scratch2  /scratch2  nfs      rw,sync,hard,intr   0  0
 EOF
 
     # create scratch drives for HPC work
