@@ -13,7 +13,7 @@ if [ -f rootcache.tar.gz ]; then
     tar --extract --numeric-owner --gzip --file rootcache.tar.gz --directory "${WORK_DIR}" 
     echo "NOT extracting new debootstrap from network, compiling rootcache.tar.gz to squashfs and deploying"
 else
-    debootstrap --variant=minbase --components=main,non-free --include=linux-image-amd64,net-tools,ifupdown,isc-dhcp-client,openssh-server,less,nano,python,emacs,lvm2,debootstrap,initramfs-tools,libopenmpi-dev,openmpi-common,syslinux-common,firmware-bnx2,nfs-common,systemd,systemd-sysv,build-essential stretch  "${WORK_DIR}" http://httpredir.debian.org/debian
+    debootstrap --variant=minbase --components=main,non-free --include=linux-image-amd64,net-tools,ifupdown,isc-dhcp-client,openssh-server,less,nano,python,emacs,lvm2,debootstrap,initramfs-tools,libopenmpi-dev,openmpi-common,openmpi-bin,syslinux-common,firmware-bnx2,nfs-common,systemd,systemd-sysv,build-essential,iputils-ping stretch  "${WORK_DIR}" http://httpredir.debian.org/debian
 
     # Clean up file with misleading information from host
     rm "${WORK_DIR}/etc/hostname"
