@@ -58,7 +58,7 @@ none                    /tmp       tmpfs    defaults            0  0
 none                    /var/tmp   tmpfs    defaults            0  0
 none                    /media     tmpfs    defaults            0  0
 none                    /var/log   tmpfs    defaults            0  0
-192.168.1.51:/home      /home      nfs      rw,sync,hard,intr   1  2
+192.168.1.51:/home      /home      nfs      rw,sync,hard,intr   0  2
 192.168.1.51:/scratch1  /scratch1  nfs      rw,sync,hard,intr   0  0
 192.168.1.51:/scratch2  /scratch2  nfs      rw,sync,hard,intr   0  0
 EOF
@@ -134,6 +134,7 @@ cp -p /etc/shadow "${WORK_DIR}/etc/"
 cp -p /etc/group "${WORK_DIR}/etc/"
 cp -p /etc/gshadow "${WORK_DIR}/etc/"
 cp -p /etc/hosts "${WORK_DIR}/etc/"
+cp -p /etc/ssh/sshd_config "${WORK_DIR}/etc/ssh/"
 
 # Build the root filesystem image, and extract the accompanying kernel and initramfs
 echo "Making squashfs, extracting kernel parts"
