@@ -1,0 +1,10 @@
+#This FSTAB is designed for use on the smaug cluster
+proc                    /proc      proc     defaults     0  0
+/dev/nfs                /          nfs      tcp,nolock   0  0
+none                    /tmp       tmpfs    defaults     0  0
+none                    /var/tmp   tmpfs    defaults     0  0
+none                    /media     tmpfs    defaults     0  0
+none                    /var/log   tmpfs    defaults     0  0
+192.168.1.51:/home      /home      nfs      tcp,nolock   1  2
+192.168.1.51:/scratch1  /scratch1  nfs      tcp,nolocak  1  2
+192.168.1.51:/scratch2  /scratch2  nfs      tcp,nolocak  1  2

@@ -13,10 +13,16 @@ if [ -f rootcache.tar.gz ]; then
     tar --extract --numeric-owner --gzip --file rootcache.tar.gz --directory "${WORK_DIR}" 
     echo "NOT extracting new debootstrap from network, compiling rootcache.tar.gz to squashfs and deploying"
 else
-    debootstrap --variant=minbase --components=main,non-free --include=linux-image-amd64,ifupdown,isc-dhcp-client,openssh-server,less,nano,python,emacs,lvm2,debootstrap,initramfs-tools,libopenmpi-dev,syslinux-common,firmware-bnx2 stretch  "${WORK_DIR}" http://httpredir.debian.org/debian
+    debootstrap --variant=minbase --components=main,non-free --include=linux-image-amd64,net-tools,ifupdown,isc-dhcp-client,openssh-server,less,nano,python,emacs,lvm2,debootstrap,initramfs-tools,libopenmpi-dev,syslinux-common,firmware-bnx2 stretch  "${WORK_DIR}" http://httpredir.debian.org/debian
 
     # Clean up file with misleading information from host
     rm "${WORK_DIR}/etc/hostname"
+
+    # TODO: create an /etc/init.d/hostname.sh script which does
+    # [ -f /etc/hostname ] && HOSTNAME="$(/bin/whereami)"
+
+    # cp whereami script to /bin/whereami
+    cp whereami "${WORK_DIR}/bin/"
     
     # Disable installation of recommended packages
     echo 'APT::Install-Recommends "false";' >"${WORK_DIR}/etc/apt/apt.conf.d/50norecommends"
@@ -29,6 +35,14 @@ auto eno1
 auto eno2
 iface eth0 inet dhcp
 EOF
+
+    # Configure /etc/defaults
+    echo ASYNCMOUNTNFS=no >> "${WORK_DIR}/etc/default/rcS"
+    echo RAMPTMP=yes >> "${WORK_DIR}/etc/default/tmpfs"
+
+    # copy sources for Debian in case we need live installs, not permanent but maybe useful?
+    cp /etc/apt/sources.list "${WORK_DIR}/etc/apt/sources.list"
+    
     # This is using google DNS servers
     cat >"${WORK_DIR}/etc/resolv.conf" << EOF
 nameserver 8.8.8.8
@@ -37,8 +51,16 @@ EOF
     
     # Setup /etc/fstab for booting to ramdisk root and NFS
     cat > "${WORK_DIR}/etc/fstab" << EOF
-none / tmpfs defaults 0 0
-192.168.1.51:/home /mnt/nfshome nfs rw,sync,hard,intr 0 0
+#This FSTAB is designed for use on the smaug cluster
+proc                    /proc      proc     defaults     0  0
+/dev/nfs                /          nfs      tcp,nolock   0  0
+none                    /tmp       tmpfs    defaults     0  0
+none                    /var/tmp   tmpfs    defaults     0  0
+none                    /media     tmpfs    defaults     0  0
+none                    /var/log   tmpfs    defaults     0  0
+192.168.1.51:/home      /home      nfs      tcp,nolock   1  2
+192.168.1.51:/scratch1  /scratch1  nfs      tcp,nolocak  1  2
+192.168.1.51:/scratch2  /scratch2  nfs      tcp,nolocak  1  2
 EOF
 
     # Set up initramfs for booting with squashfs+aufs
@@ -101,12 +123,13 @@ chmod +x "${WORK_DIR}/etc/initramfs-tools/scripts/init-bottom/aufs"
 chroot "${WORK_DIR}" update-initramfs -u
 #    chroot "${WORK_DIR}" mkinitramfs -o /boot/initrd.img-ramboot; update-initramfs -u
 
-# Copy across configuration details for users, groups, etc
+# Copy across configuration details for users, groups, hosts, etc
 echo "Copying passwd, shadow, group, and gshadow over to working image"
 cp -p /etc/passwd "${WORK_DIR}/etc/"
 cp -p /etc/shadow "${WORK_DIR}/etc/"
 cp -p /etc/group "${WORK_DIR}/etc/"
 cp -p /etc/gshadow "${WORK_DIR}/etc/"
+cp -p /etc/hosts "${WORK_DIR}/etc/"
 
 # Build the root filesystem image, and extract the accompanying kernel and initramfs
 echo "Making squashfs, extracting kernel parts"

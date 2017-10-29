@@ -1,0 +1,19 @@
+#!/bin/bash
+# finds node’s hostname based on matching ip in /etc/hosts
+# on Debian requires net-tools to be installed (ifconfig)
+
+ifc=$(ifconfig)
+netlines=$(grep 'inet ' <<< "$ifc")
+# don't keep lines that are loopback
+addr=$(grep -v '127.0.0.1' <<< "$netlines")
+# this is weird because it counts every space... I'm not sure I like that
+# myip=$(echo "$addr" | /usr/bin/cut --delimiter=$' ' --fields=10)
+# use arrays instead, split on spaces
+ips=($addr)
+myip=${ips[1]}
+#echo 'Found ip in whereami: ' "$myip"
+# find the ip line we're looking for
+hostline=$(grep "$myip" <<< $(cat /etc/hosts))
+hostsarray=($hostline)
+# the second value is assumed to be the name, first is the ip
+echo ${hostsarray[1]}
