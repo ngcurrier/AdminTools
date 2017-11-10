@@ -1,5 +1,5 @@
 #!/bin/bash
-sqset -e
+#sqset -e
 
 WORK_DIR="$(mktemp --directory --tmpdir build-root.XXXXXXXX)"
 trap 'rm -rf "${WORK_DIR}"' EXIT
@@ -67,6 +67,14 @@ EOF
     mkdir "${WORK_DIR}/mnt/scratch1"
     mkdir "${WORK_DIR}/mnt/scratch2"
     mkdir "${WORK_DIR}/mnt/home"
+
+    # create drives for users, use external file for security
+    # these aren't actually usable (read-only), just allows for login
+    filename='users.txt'
+    filelines=`cat $filename`
+    for line in $filelines ; do
+	mkdir "${WORK_DIR}/home/${line}
+    done
     
     # Set up initramfs for booting with squashfs+aufs
     cat >> "${WORK_DIR}/etc/initramfs-tools/modules" << EOF
