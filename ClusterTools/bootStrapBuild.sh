@@ -52,20 +52,21 @@ EOF
     # Setup /etc/fstab for booting to ramdisk root and NFS
     cat > "${WORK_DIR}/etc/fstab" << EOF
 #This FSTAB is designed for use on the smaug cluster
-proc                    /proc      proc     defaults            0  0
-/dev/nfs                /          nfs      tcp,nolock          0  0
-none                    /tmp       tmpfs    defaults            0  0
-none                    /var/tmp   tmpfs    defaults            0  0
-none                    /media     tmpfs    defaults            0  0
-none                    /var/log   tmpfs    defaults            0  0
-192.168.1.51:/home      /home      nfs      rw,sync,hard,intr   0  2
-192.168.1.51:/scratch1  /scratch1  nfs      rw,sync,hard,intr   0  0
-192.168.1.51:/scratch2  /scratch2  nfs      rw,sync,hard,intr   0  0
+proc                    /proc          proc     defaults            0  0
+/dev/nfs                /              nfs      tcp,nolock          0  0
+none                    /tmp           tmpfs    defaults            0  0
+none                    /var/tmp       tmpfs    defaults            0  0
+none                    /media         tmpfs    defaults            0  0
+none                    /var/log       tmpfs    defaults            0  0
+192.168.1.51:/home      /mnt/home      nfs      rw,sync,hard,intr   0  0
+192.168.1.51:/scratch1  /mnt/scratch1  nfs      rw,sync,hard,intr   0  0
+192.168.1.51:/scratch2  /mnt/scratch2  nfs      rw,sync,hard,intr   0  0
 EOF
 
     # create scratch drives for HPC work
-    mkdir "${WORK_DIR}/scratch1"
-    mkdir "${WORK_DIR}/scratch2"
+    mkdir "${WORK_DIR}/mnt/scratch1"
+    mkdir "${WORK_DIR}/mnt/scratch2"
+    mkdir "${WORK_DIR}/mnt/home"
     
     # Set up initramfs for booting with squashfs+aufs
     cat >> "${WORK_DIR}/etc/initramfs-tools/modules" << EOF
