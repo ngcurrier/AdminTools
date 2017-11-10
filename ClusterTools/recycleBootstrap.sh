@@ -18,7 +18,7 @@ sed -i '/smaugNFSRoot/s/^/#/g' /etc/exports
 umount /smaugNFSRoot/
 
 # run the boostrap build script (installs to tftp server)
-./booStrapBuild.sh
+./bootStrapBuild.sh
 
 # remount the squashfs
 mount -a
