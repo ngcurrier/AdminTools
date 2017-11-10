@@ -10,10 +10,12 @@ echo "${WORK_DIR}"
 # if rootcache.tar.gz exists then just create the squashfs and move on
 # this is useful if we need to hand edit something there are want to deploy that work
 if [ -f rootcache.tar.gz ]; then
-    tar --extract --numeric-owner --gzip --file rootcache.tar.gz --directory "${WORK_DIR}" 
     echo "NOT extracting new debootstrap from network, compiling rootcache.tar.gz to squashfs and deploying"
+    tar --extract --numeric-owner --gzip --file rootcache.tar.gz --directory "${WORK_DIR}" 
+    chmod 755 "${WORK_DIR}"
 else
     debootstrap --variant=minbase --components=main,non-free --include=linux-image-amd64,net-tools,ifupdown,isc-dhcp-client,openssh-server,less,nano,python,emacs,lvm2,debootstrap,initramfs-tools,libopenmpi-dev,openmpi-common,openmpi-bin,syslinux-common,firmware-bnx2,nfs-common,systemd,systemd-sysv,build-essential,iputils-ping stretch  "${WORK_DIR}" http://httpredir.debian.org/debian
+    chmod 755 "${WORK_DIR}"
 
     # Clean up file with misleading information from host
     rm "${WORK_DIR}/etc/hostname"
@@ -72,8 +74,10 @@ EOF
     # these aren't actually usable (read-only), just allows for login
     filename='users.txt'
     filelines=`cat $filename`
-    for line in $filelines ; do
-	mkdir "${WORK_DIR}/home/${line}
+    for user in $filelines ; do
+	mkdir "${WORK_DIR}/home/${user}"
+	chown "${user}" "${WORK_DIR}/home/${user}"
+	chgrp "${user}" "${WORK_DIR}/home/${user}"
     done
     
     # Set up initramfs for booting with squashfs+aufs
