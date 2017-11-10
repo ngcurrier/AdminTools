@@ -60,7 +60,7 @@ none                    /tmp           tmpfs    defaults            0  0
 none                    /var/tmp       tmpfs    defaults            0  0
 none                    /media         tmpfs    defaults            0  0
 none                    /var/log       tmpfs    defaults            0  0
-192.168.1.51:/home      /mnt/home      nfs      rw,sync,hard,intr   0  0
+192.168.1.51:/home      /home          nfs      rw,sync,hard,intr   0  0
 192.168.1.51:/scratch1  /mnt/scratch1  nfs      rw,sync,hard,intr   0  0
 192.168.1.51:/scratch2  /mnt/scratch2  nfs      rw,sync,hard,intr   0  0
 EOF
@@ -70,7 +70,7 @@ EOF
     mkdir "${WORK_DIR}/mnt/scratch2"
     mkdir "${WORK_DIR}/mnt/home"
 
-    # create drives for users, use external file for security
+    # create linked drives for users, use external file for security
     # these aren't actually usable (read-only), just allows for login
     filename='users.txt'
     filelines=`cat $filename`
