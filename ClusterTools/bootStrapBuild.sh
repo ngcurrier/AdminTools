@@ -1,6 +1,13 @@
 #!/bin/bash
 #sqset -e
 
+# This file creates a squashfs image of a boot strapped Debian install for HPC use
+# It requires that a list of users (one per line) is found in users.txt
+# It is suggeted that the recycle script be used instead so that the appropriate things
+# can be installed and mounted w/o NFS complaining
+# This script is very customized for my HPC machine, however, it is easy to change should
+# your requirements be different.
+
 WORK_DIR="$(mktemp --directory --tmpdir build-root.XXXXXXXX)"
 trap 'rm -rf "${WORK_DIR}"' EXIT
 
@@ -20,9 +27,9 @@ else
     # Clean up file with misleading information from host
     rm "${WORK_DIR}/etc/hostname"
 
-    # TODO: create an /etc/init.d/hostname.sh script which does
-    # [ -f /etc/hostname ] && HOSTNAME="$(/bin/whereami)"
-
+    #TODO: create an /etc/init.d/setHostname.sh script which does
+    cp setHostname.sh "${WORK_DIR}/etc/init.d/"
+    
     # cp whereami script to /bin/whereami
     cp whereami "${WORK_DIR}/bin/"
     
@@ -51,29 +58,34 @@ nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
     
-    # Setup /etc/fstab for booting to ramdisk root and NFS
+    # Setup /etc/fstab for booting to ramdisk root and NFS (ro) root
+    # We also mount some scratch NFS drives for HPC running which have
+    # looser settings for performance, home drives are mounted directly
+    # across NFS. There are some downsides to doing this but ultimately
+    # it is useful so that ssh-keygen can work correctly with openMPI
+    # across all installed users
     cat > "${WORK_DIR}/etc/fstab" << EOF
 #This FSTAB is designed for use on the smaug cluster
-proc                    /proc          proc     defaults             0  0
-/dev/nfs                /              nfs      tcp,nolock           0  0
-none                    /tmp           tmpfs    defaults             0  0
-none                    /var/tmp       tmpfs    defaults             0  0
-none                    /media         tmpfs    defaults             0  0
-none                    /var/log       tmpfs    defaults             0  0
-192.168.1.51:/home      /home          nfs      rw,sync,hard,intr    0  0
-192.168.1.51:/scratch1  /mnt/scratch1  nfs      rw,async,hard,intr   0  0
-192.168.1.51:/scratch2  /mnt/scratch2  nfs      rw,async,hard,intr   0  0
+proc                        /proc          proc     defaults             0  0
+/dev/nfs                    /              nfs      tcp,nolock           0  0
+none                        /tmp           tmpfs    defaults             0  0
+none                        /var/tmp       tmpfs    defaults             0  0
+none                        /media         tmpfs    defaults             0  0
+none                        /var/log       tmpfs    defaults             0  0
+192.168.1.51:/home          /home          nfs      rw,sync,hard,intr    0  0
+192.168.1.51:/mnt/scratch1  /mnt/scratch1  nfs      rw,async,hard,intr   0  0
+192.168.1.51:/mnt/scratch2  /mnt/scratch2  nfs      rw,async,hard,intr   0  0
 EOF
 
     # create scratch drives for HPC work
     mkdir "${WORK_DIR}/mnt/scratch1"
     mkdir "${WORK_DIR}/mnt/scratch2"
-    mkdir "${WORK_DIR}/mnt/home"
-
+    
     # create linked drives for users, use external file for security
     # these aren't actually usable (read-only), just allows for login
     filename='users.txt'
     filelines=`cat $filename`
+    mkdir "${WORK_DIR}/home/root"
     for user in $filelines ; do
 	mkdir "${WORK_DIR}/home/${user}"
 	chown "${user}" "${WORK_DIR}/home/${user}"
@@ -157,7 +169,7 @@ cp -p "${WORK_DIR}/boot"/initrd.img-* br.initrd.new; mv br.initrd.new br.initrd
 #cp -p "${WORK_DIR}/boot"/initrd.img-ramboot br.initrd.new; mv br.initrd.new br.initrd
 cp -p "${WORK_DIR}/usr/lib/syslinux/modules/bios/ldlinux.c32" ldlinux.c32.new; mv ldlinux.c32.new br.ldlinux.c32
 
-# This needs to be copied to the html server
+# This needs to be copied to the html and tftp server
 echo "Copying squashfs, vmlinuz, ldlinux.c32, and initrd to servers"
 cp br.squashfs /var/www/html/debian-live/br.squashfs
 cp br.squashfs /srv/tftpdboot/br.squashfs
