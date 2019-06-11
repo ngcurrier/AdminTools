@@ -4,10 +4,10 @@
 # Regular Colors
 Black='\[\e[0;30m\]'
 Red='\[\e[0;31m\]'
-Green='\[\e[0;32m\]'
+Green='\[\e\]\[[0;32m\]'
 Yellow='\[\e[0;33m\]'
-Blue='\[\e[0;34m\]'
-Purple='\[\e[0;35m\]'
+Blue='\[\e\]\[[0;34m\]'
+Purple='\[\e\]\[[0;35m\]'
 Cyan='\[\e[0;36m\]'
 White='\[\e[0;37m\]'
 Light_Gray='\[\033[0;37m\]'
@@ -24,12 +24,12 @@ BWhite='\[\e[1;37m\]'
 BLight_Gray='\[\033[1;37m\]'
 
 # Reset colors
-NONE="\[\e[0m\]"
+NONE="\[\e\]\[[0m\]"
 
 # Variables
-ps1_user="$Blue\u$NONE"
-ps1_host="$Green\h$NONE"
-ps1_dir="$Purple\w$NONE"
+ps1_user="\[$Blue\u$NONE\]"
+ps1_host="\[$Green\h$NONE\]"
+ps1_dir="\[$Purple\[\w\]\[$NONE\]\]"
 ps1_git="$Cyan \$(parse_git_branch)$Red \$(git_dirty)$NONE "
 
 # Option 1 user@host:dir(branch)! $
